@@ -3,7 +3,7 @@
 为了简化读取配置文件,可以把所有配置读取到统一的config.py中.
 """
 
-from Python_lxf.awesomepython3webapp.www import config_default
+import config_default
 
 
 class Dict(dict):

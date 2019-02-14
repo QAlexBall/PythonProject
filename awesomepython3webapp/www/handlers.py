@@ -2,11 +2,11 @@
 """ url handlers """
 import re, time, json, logging, hashlib, base64, asyncio
 from aiohttp import web
-from Python_lxf.awesomepython3webapp.www import markdown2
-from Python_lxf.awesomepython3webapp.www.config import configs
-from Python_lxf.awesomepython3webapp.www.coroweb import get, post
-from Python_lxf.awesomepython3webapp.www.models import User, Comment, Blog, next_id
-from Python_lxf.awesomepython3webapp.www.apis import APIValueError, APIResourceNotFoundError, APIPermissionError, Page
+import markdown2
+from config import configs
+from coroweb import get, post
+from models import User, Comment, Blog, next_id
+from apis import APIValueError, APIResourceNotFoundError, APIPermissionError, Page
 COOKIE_NAME = 'awesession'
 _COOKIE_KEY = configs.session.secret
 

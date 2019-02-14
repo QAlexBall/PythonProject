@@ -1,12 +1,12 @@
 import logging
 from jinja2 import Environment, FileSystemLoader
-from Python_lxf.awesomepython3webapp.www.config import configs
-from Python_lxf.awesomepython3webapp.www.coroweb import add_routes, add_static
+from config import configs
+from coroweb import add_routes, add_static
 logging.basicConfig(level=logging.INFO)
 import asyncio, os, json, time
 from datetime import datetime
 from aiohttp import web
-from Python_lxf.awesomepython3webapp.www import orm
+import orm
 
 """
 day1
@@ -57,10 +57,10 @@ async def auth_factory(app, handler):
     async def auth(request):
         logging.info('check user: %s %s' % (request.method, request.path))
         request.__user__ = None
-        from Python_lxf.awesomepython3webapp.www.handlers import COOKIE_NAME
+        from handlers import COOKIE_NAME
         cookie_str = request.cookies.get(COOKIE_NAME)
         if cookie_str:
-            from Python_lxf.awesomepython3webapp.www.handlers import cookie2user
+            from handlers import cookie2user
             user = await cookie2user(cookie_str)
             if user:
                 logging.info('set current user: %s' % user.email)

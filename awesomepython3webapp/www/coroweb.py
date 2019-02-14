@@ -8,7 +8,7 @@ from urllib import parse
 
 from aiohttp import web
 
-from Python_lxf.awesomepython3webapp.www.apis import APIError
+from apis import APIError
 
 
 # 把一个函数映射为一个URL处理函数,先定义一个@get()
