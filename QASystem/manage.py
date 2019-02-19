@@ -2,7 +2,7 @@ from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from app import app
 from extensions import db
-
+from models import User
 
 manager = Manager(app)
 
