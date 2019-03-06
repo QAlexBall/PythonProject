@@ -2,14 +2,19 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import config
 from models import User
 from extensions import db
+from decorators import login_required
 
 app = Flask(__name__)
 app.config.from_object(config)
 db.init_app(app)
 
+
+
 @app.route('/')
+@login_required
 def index():
     return render_template('index.html')
+
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
@@ -59,6 +64,7 @@ def logout():
     return redirect(url_for('login'))
 
 @app.route('/question/')
+@login_required
 def question():
     if request.method == 'GET':
         return render_template('question.html')
