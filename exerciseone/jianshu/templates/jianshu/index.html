@@ -1,0 +1,30 @@
+{% extends 'jianshu/base.html' %}
+{% block title %}Index{% endblock %}
+
+{% block head %}{% endblock %}
+
+{% block main %}
+{% load static %}
+{#<link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}">#}
+
+{% if info_list %}
+    <ul>
+    {% for article, album in info_list %}
+        <li>
+        <a href="/jianshu/{{ article.article_id }}/">
+            <h3>{{ article.article_title }} </h3>
+        </a>
+            <h5>
+                <img src="/static/media/{{ album.album_img }}" width="35", height="35">
+                {{ article.article_created_time }}
+            </h5>
+        </a>
+        </li>
+{#        <a href="/jianshu/write_comment/{{ article.article_id }}/">Post Comment</a></li>#}
+{#        <li><a href="{% url 'jianshu:detail' article.article_id %}">{{ article.article_title }}</a></li>#}
+        {% endfor %}
+    </ul>
+{% else %}
+    <p> No articles are available. </p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'jianshu/base.html' %}
+{% block title %} Write Comment {% endblock %}
+
+{% block head %}
+
+{#    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>#}
+    <script type="text/javascript">
+        function submit() {
+            var comments = $('#comment-id').val()
+            document.write(comments)
+            if (comments == "") {
+                alert("评论不能为空");
+                return;
+            }
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: "/jianshu/{{ article_id }}/comment/",
+                data: {'article_comments': comments},
+                async: true,
+                success: function (data) {
+                    if (data.status == 'fail') {
+                        alert(data.msg)
+                    }
+                    else if (data.status == "success") {
+                        window.location.reload()
+                    }
+                }
+            })
+        }
+    </script>
+{% endblock %}
+
+{% block main %}
+    <h4 class="center"> 编写评论 </h4>
+    <ul class="">
+        {% for comment in comments %}
+            <li>
+                <h5>评论内容: {{ comment }}</h5>
+                <h5>创建时间: {{ comment.comment_create_time }}</h5>
+            </li>
+        {% endfor %}
+    </ul>
+{#    <form action="", method="POST">#}
+{#        <div class="form-container">#}
+{#            <div class="form-group">#}
+{#                <input id="comment-id" type="text" class="form-control" placeholder="comment" name="comment">#}
+{#            </div>#}
+{#            <div class="form-group">#}
+{#                <button id="button-id" class="btn btn-primary" onclick="submit">提交评论</button>#}
+{#            </div>#}
+{#        </div>#}
+{#    </form>#}
+    <div>
+        <textarea id=comment-id cols="80" rows="1"></textarea>
+        <button class="btn" id=button-id onclick="submit()">提交</button>
+    </div>
+
+
+{% endblock %}

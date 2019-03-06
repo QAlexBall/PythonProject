@@ -1,0 +1,27 @@
+<html>
+<head>
+<script type="text/javascript">
+function loadXMLDoc()
+{
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function()
+    {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+        {
+            document.getElementById("myDiv").innerHTML = xmlhttp.responseText;
+        }
+    }
+    {% load static %}
+    xmlhttp.open("GET", "{% static 'ajax/test1.txt' %}/", true);
+    xmlhttp.send();
+}
+</script>
+</head>
+<body>
+
+<div id="myDiv"><h2>Let AJAX change this text</h2></div>
+<button type="button" onclick="loadXMLDoc()">通过 AJAX 改变内容</button>
+{% load static %}
+<img src="{% static 'media/upload/2.jpg' %}" alt="" height="100" width="100">
+</body>
+</html>
