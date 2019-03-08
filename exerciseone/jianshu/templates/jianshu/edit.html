@@ -6,11 +6,16 @@
 {% endblock %}
 
 {% block main %}
+    <p>{{ article_not_exist }}</p>
+    <p>{{ img_error }}</p>
+    <p>{{ user_error }}</p>
     <h3 class="page-title">编辑文章</h3>
         <form action="", method="POST" enctype="multipart/form-data">
         <div class="form-container">
             <div class="form-group">
-                <textarea rows="15" placeholder="正文" class="form-control" name="context">{{ context }}</textarea>
+                <textarea rows="15" placeholder="正文" class="form-control" name="article_context">
+                    {{ article.article_context }}
+                </textarea>
             </div>
             <div class="form-group">
                 <button class="btn btn-primary">提交</button>

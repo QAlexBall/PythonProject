@@ -7,10 +7,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+import os
 
 from .models import Article, Comment, ImageAlbum
-from .forms import CommentModelForm, ArticleModelForm, ImageAlbumModelForm
-import os
+from .forms import CommentModelForm, ArticleModelForm, ArticleContextModelForm
 # Create your views here.
 
 
@@ -66,24 +66,26 @@ def write_article(request):
     return render(request, 'jianshu/write.html', message)
 
 
-@csrf_exempt
 def article_content(request, article_id):
     message = {}
     album = ImageAlbum()
-    article = Article.objects.get(article_id=article_id)
-    comments = Comment.objects.filter(article=article).order_by('-comment_create_time')[:5]
+    article = Article()
     try:
-        album = ImageAlbum.objects.get(album_article=article)
-    except ImageAlbum.DoesNotExist:
-        message["img_error"] = "图片不存在"
-
-    if album.album_user.username == request.user.username:
-        message['edit_and_delete'] = True
+        article = Article.objects.get(article_id=article_id)
+    except Article.DoesNotExist:
+        message["article_not_exist"] = "当前文章不存在"
+    comments = Comment.objects.filter(article=article).order_by('-comment_create_time')[:5]
+    if article:
+        try:
+            album = ImageAlbum.objects.get(album_article=article)
+            if album.album_user.username == request.user.username:
+                message['edit_and_delete'] = True
+        except ImageAlbum.DoesNotExist:
+            message["img_error"] = "图片不存在"
 
     message['article'] = article
     message['comments'] = comments
     message['album'] = album
-    message['user_name'] = album.album_user.username
 
     return render(request, 'jianshu/article_content.html', message)
 
@@ -91,35 +93,62 @@ def article_content(request, article_id):
 @login_required(login_url='login')
 def edit_article(request, article_id):
     message = {}
-    article = Article.objects.get(article_id=article_id)
-
+    article = Article()
+    try:
+        article = Article.objects.get(article_id=article_id)
+    except Article.DoesNotExist:
+        message["article_not_exist"] = "当前文章不存在"
+    if article:
+        try:
+            album = ImageAlbum.objects.get(album_article=article)
+            if request.user != album.album_user:
+                message["user_error"] = "当前用户无编辑该文章权限"
+                print(message["user_error"])
+                return HttpResponse(message["user_error"])
+        except ImageAlbum.DoesNotExist:
+            message["img_error"] = "图片不存在"
 
     if request.method == "POST":
-        context = request.POST['context']
-        Article.objects.filter(article_id=article_id).update(article_context=context)
-        return redirect('article_content', article_id=article_id)
+        if request.POST['article_context']:
+            Article.objects.filter(article_id=article_id).update(article_context=request.POST['article_context'])
+            return redirect('article_content', article_id=article_id)
+        else:
+            return HttpResponse("文章修改失败")
 
     message["article"] = article
-
     return render(request, 'jianshu/edit.html', message)
 
 @csrf_exempt
+@login_required(login_url='login')
 def del_article(request, article_id):
-    if request.method == 'GET':
-        return render(request, 'jianshu/delete_article.html')
-    else:
+    message = {}
+    article = Article()
+    try:
+        article = Article.objects.get(article_id=article_id)
+    except Article.DoesNotExist:
+        message["article_not_exist"] = "当前文章不存在"
+    if article:
+        try:
+            album = ImageAlbum.objects.get(album_article=article)
+            if request.user != album.album_user:
+                message["user_error"]  = "当前用户没有权限删除该文章"
+                print(message["user_error"])
+                return HttpResponse(message["user_error"])
+        except ImageAlbum.DoesNotExist:
+            message["img_error"] = "图片不存在"
+
+    if request.method == "POST":
         confirm_info = request.POST['confirm']
         if confirm_info == 'y':
-            article = Article.objects.filter(article_id=article_id).first()
-            album = ImageAlbum.objects.filter(album_article=article).first()
-            path = album.album_img
-            img_path = str(os.getcwd()) + '/jianshu/static/media/' + str(path)
+            img_path = str(os.getcwd() + '/jianshu/static/media/' + str(album.album_img))
             os.remove(img_path)
             album.delete()
             article.delete()
             return redirect('index')
         else:
             return redirect('article_content', article_id=article_id)
+
+    return render(request, 'jianshu/delete_article.html')
 
 @csrf_exempt
 @login_required(login_url='login')

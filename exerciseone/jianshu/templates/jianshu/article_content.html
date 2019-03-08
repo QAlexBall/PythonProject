@@ -1,10 +1,15 @@
 {% extends 'jianshu/base.html' %}
 {% block title %}Index{% endblock %}
 
-{% block head %}{% endblock %}
+{% block head %}
+
+{% endblock %}
 
 {% block main %}
     <ul>
+        <p>{{ article_not_exist }}</p>
+        <p>{{ img_error }}</p>
+        <p>{{ user_error }}</p>
         <h3 class="page-title"> {{ article.article_title }} </h3>
         <h5 class="page-title">作者: {{ album.album_user.username }} </h5>
         <h5 class="page-title">创建时间: {{ article.article_created_time }}</h5>
@@ -29,15 +34,4 @@
         </ul>
     </ul>
     <button class="btn"><a href="/jianshu/{{ article.article_id }}/comment/">全部评论</a></button>
-{#    <form action="", method="POST">#}
-{#        <div class="form-container">#}
-{#            <div class="form-group">#}
-{#                <input id="comment_id" type="text" class="form-control" placeholder="comment" name="comment">#}
-{#            </div>#}
-{#            <div class="form-group">#}
-{#                <button id="button_id" class="btn btn-primary">提交评论</button>#}
-{#            </div>#}
-{#        </div>#}
-{#    </form>#}
-{#    <a href="/jianshu/write_comment/{{ article_id }}/"> <button class="btn">Post Comment</button> </a>#}
 {% endblock %}

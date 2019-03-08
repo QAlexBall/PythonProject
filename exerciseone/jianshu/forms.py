@@ -18,6 +18,12 @@ class ArticleModelForm(ModelForm):
         fields = ['article_title',
                   'article_context',]
 
+class ArticleContextModelForm(ModelForm):
+
+    class Meta:
+        model = Article
+        fields = ['article_context']
+
 class UserModelForm(ModelForm):
 
     class Meta:
