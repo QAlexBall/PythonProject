@@ -5,39 +5,39 @@
 
 {% block main %}
     <ul>
-        <h3 class="page-title"> {{ article_title }} </h3>
-        <h5 class="page-title">作者: {{ user_name }} </h5>
-        <h5 class="page-title">创建时间: {{ article_created_time }}</h5>
-         {% if album_img %}
-             <img src="/static/media/{{ album_img }}" alt="" height="100" width="100">
+        <h3 class="page-title"> {{ article.article_title }} </h3>
+        <h5 class="page-title">作者: {{ album.album_user.username }} </h5>
+        <h5 class="page-title">创建时间: {{ article.article_created_time }}</h5>
+         {% if album.album_img %}
+             <img src="/static/media/{{ album.album_img }}" alt="" height="100" width="100">
          {% endif %}
-        <p>{{ article_context }} </p>
+        <p>{{ article.article_context }} </p>
         {% if edit_and_delete == True %}
             <p>
-                <a href="/jianshu/{{ article_id }}/edit/"><button class="btn">edit</button></a>
-                <a href="/jianshu/{{ article_id }}/delete/"><button class="btn">delete</button></a>
+                <a href="/jianshu/{{ article.article_id }}/edit/"><button class="btn">edit</button></a>
+                <a href="/jianshu/{{ article.article_id }}/delete/"><button class="btn">delete</button></a>
             </p>
         {% endif %}
         <h4 class="">最新评论</h4>
         <ul class="">
             {% for comment in comments %}
                 <li>
-                <h5>评论内容: {{ comment }}</h5>
+                <h5>评论内容: {{ comment.comment_context }}</h5>
                 <h5>创建时间: {{ comment.comment_create_time }}</h5>
                 </li>
             {% endfor %}
         </ul>
     </ul>
-    <form action="", method="POST">
-        <div class="form-container">
-            <div class="form-group">
-                <input id="comment_id" type="text" class="form-control" placeholder="comment" name="comment">
-            </div>
-            <div class="form-group">
-                <button id="button_id" class="btn btn-primary">提交评论</button>
-                <button class="btn"><a href="/jianshu/{{ article_id }}/comment/">全部评论</a></button>
-            </div>
-        </div>
-    </form>
+    <button class="btn"><a href="/jianshu/{{ article.article_id }}/comment/">全部评论</a></button>
+{#    <form action="", method="POST">#}
+{#        <div class="form-container">#}
+{#            <div class="form-group">#}
+{#                <input id="comment_id" type="text" class="form-control" placeholder="comment" name="comment">#}
+{#            </div>#}
+{#            <div class="form-group">#}
+{#                <button id="button_id" class="btn btn-primary">提交评论</button>#}
+{#            </div>#}
+{#        </div>#}
+{#    </form>#}
 {#    <a href="/jianshu/write_comment/{{ article_id }}/"> <button class="btn">Post Comment</button> </a>#}
 {% endblock %}

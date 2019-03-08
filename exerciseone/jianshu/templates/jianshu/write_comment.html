@@ -2,7 +2,6 @@
 {% block title %} Write Comment {% endblock %}
 
 {% block head %}
-
 {#    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>#}
     <script type="text/javascript">
         function submit() {
@@ -15,8 +14,8 @@
             $.ajax({
                 cache: false,
                 type: "POST",
-                url: "/jianshu/{{ article_id }}/comment/",
-                data: {'article_comments': comments},
+                url: "/jianshu/{{ article.article_id }}/comment/",
+                data: {'article': {{ article.article_id }}, 'comment_context': comments},
                 async: true,
                 success: function (data) {
                     if (data.status == 'fail') {
@@ -41,20 +40,8 @@
             </li>
         {% endfor %}
     </ul>
-{#    <form action="", method="POST">#}
-{#        <div class="form-container">#}
-{#            <div class="form-group">#}
-{#                <input id="comment-id" type="text" class="form-control" placeholder="comment" name="comment">#}
-{#            </div>#}
-{#            <div class="form-group">#}
-{#                <button id="button-id" class="btn btn-primary" onclick="submit">提交评论</button>#}
-{#            </div>#}
-{#        </div>#}
-{#    </form>#}
     <div>
         <textarea id=comment-id cols="80" rows="1"></textarea>
         <button class="btn" id=button-id onclick="submit()">提交</button>
     </div>
-
-
 {% endblock %}
