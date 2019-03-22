@@ -14,7 +14,8 @@ Login
     <p>{{ no_username }}</p>
     <p>{{ no_password }}</p>
     <h3 class="page-title">Login</h3>
-    <form action="", method="POST">
+    <form action="", method="POST"> 
+        {% csrf_token  %}
         <div class="form-container">
             <div class="form-group">
                 <input type="text" class="form-control" placeholder="用户名" name="username">

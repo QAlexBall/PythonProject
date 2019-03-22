@@ -1,8 +1,41 @@
 {% extends 'jianshu/base.html' %}
-{% block title %}Index{% endblock %}
+{% block title %}
+Index
+{% endblock %}
 
 {% block head %}
+    <script type="text/javascript">
 
+        function submit123() {
+            var comments = $('#comment_id').val();
+            if (comments == "") {
+                alert("comment can't empty");
+                return;
+            }
+
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: "/jianshu/{{ article.id }}/",
+                data: {'context': comments},
+                async: true,
+                beforeSend:function (xhr,settings) {
+                    xhr.setRequestHeader("X-CSRFToken","{{ csrf_token }}");
+                },
+                success: function (message) {
+                  if (message.status == 'failed') {
+                      alert("comment error!");
+                  }
+                  else if (message.status == 'success') {
+                      alert("comment success!");
+                      $("#comment_ul").prepend("<h5>时间：" + message.time + "</h5>");
+                      $("#comment_ul").prepend("<li><h5>评论内容：" + comments + "</h5></li>");
+                  }
+                }
+            });
+        }
+    
+    </script>
 {% endblock %}
 
 {% block main %}
@@ -10,28 +43,29 @@
         <p>{{ article_not_exist }}</p>
         <p>{{ img_error }}</p>
         <p>{{ user_error }}</p>
-        <h3 class="page-title"> {{ article.article_title }} </h3>
-        <h5 class="page-title">作者: {{ album.album_user.username }} </h5>
-        <h5 class="page-title">创建时间: {{ article.article_created_time }}</h5>
-         {% if album.album_img %}
-             <img src="/static/media/{{ album.album_img }}" alt="" height="100" width="100">
-         {% endif %}
-        <p>{{ article.article_context }} </p>
+        <p>{{ permission_error }} </p>
+        <h3 class="page-title"> {{ article.title }} </h3>
+        <h5 class="page-title">作者: {{ article.author }} </h5>
+        <h5 class="page-title">创建时间: {{ article.created_time }}</h5>
+        <img src="/static/media/{{ article.image }}" alt="" height="100" width="100">
+        <p>{{ article.context }} </p>
         {% if edit_and_delete == True %}
             <p>
-                <a href="/jianshu/{{ article.article_id }}/edit/"><button class="btn">edit</button></a>
-                <a href="/jianshu/{{ article.article_id }}/delete/"><button class="btn">delete</button></a>
+                <a href="/jianshu/{{ article.id }}/edit/"><button class="btn">edit</button></a>
+                <a href="/jianshu/{{ article.id }}/delete/"><button class="btn">delete</button></a>
             </p>
         {% endif %}
         <h4 class="">最新评论</h4>
-        <ul class="">
+        <ul class="" id="comment_ul">
             {% for comment in comments %}
-                <li>
-                <h5>评论内容: {{ comment.comment_context }}</h5>
-                <h5>创建时间: {{ comment.comment_create_time }}</h5>
-                </li>
+            <li><h5>评论内容：{{ comment.context }} </h5></li>
+            <h5>时间：{{ comment.created_time }} </h5>
             {% endfor %}
         </ul>
     </ul>
-    <button class="btn"><a href="/jianshu/{{ article.article_id }}/comment/">全部评论</a></button>
+    <form action=""  method="post" id="form1" >
+        {% csrf_token  %}
+        {{ comment_form }}
+        <input id="button1" class="btn btn-primary" type="button"  value="submit" onclick="submit123()"/>
+    </form>
 {% endblock %}

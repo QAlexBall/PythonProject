@@ -1,38 +1,31 @@
 # encoding: utf-8
 
+from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.models import User
-from .models import Comment, Article, ImageAlbum
-
-class CommentModelForm(ModelForm):
-
-    class Meta:
-        model = Comment
-        fields = ['article',
-                  'comment_context',]
+from .models import Comment, Article
 
 class ArticleModelForm(ModelForm):
 
     class Meta:
         model = Article
-        fields = ['article_title',
-                  'article_context',]
+        fields = ['title',
+                  'context',
+                  'image', ]
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),            
+            'context': forms.Textarea(attrs={'class': 'form-control', 'rows': 15}),
+        }
 
-class ArticleContextModelForm(ModelForm):
-
-    class Meta:
-        model = Article
-        fields = ['article_context']
-
-class UserModelForm(ModelForm):
-
-    class Meta:
-        model = User
-        fields = ['username',
-                  'password', ]
-
-class ImageAlbumModelForm(ModelForm):
+class CommentModelForm(ModelForm):
 
     class Meta:
-        model = ImageAlbum
-        fields = ['album_img']
+        model = Comment
+        fields = ['context']
+        
+        widgets = {
+            'context': forms.Textarea(attrs={'class': 'form-control', 
+                                             'rows': 2,
+                                             'id': 'comment_id'}),
+        }
+

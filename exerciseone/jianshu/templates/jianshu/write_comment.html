@@ -2,7 +2,6 @@
 {% block title %} Write Comment {% endblock %}
 
 {% block head %}
-{#    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>#}
     <script type="text/javascript">
         function submit() {
             var comments = $('#comment-id').val()
@@ -14,11 +13,11 @@
             $.ajax({
                 cache: false,
                 type: "POST",
-                url: "/jianshu/{{ article.article_id }}/comment/",
-                data: {'article': {{ article.article_id }}, 'comment_context': comments},
+                url: "/jianshu/{{ article.id }}/comment/",
+                data: {'article': {{ article.id }}, 'comment_context': comments},
                 async: true,
                 success: function (data) {
-                    if (data.status == 'fail') {
+                    if (data.status == 'failed') {
                         alert(data.msg)
                     }
                     else if (data.status == "success") {
@@ -31,17 +30,18 @@
 {% endblock %}
 
 {% block main %}
-    <h4 class="center"> 编写评论 </h4>
+    <h4> 编写评论 </h4>
     <ul class="">
         {% for comment in comments %}
             <li>
                 <h5>评论内容: {{ comment }}</h5>
-                <h5>创建时间: {{ comment.comment_create_time }}</h5>
+                <h5>创建时间: {{ comment.created_time }}</h5>
             </li>
         {% endfor %}
     </ul>
-    <div>
-        <textarea id=comment-id cols="80" rows="1"></textarea>
-        <button class="btn" id=button-id onclick="submit()">提交</button>
-    </div>
+    <form action="", method="POST">
+        {% csrf_token %}
+        {{ comment_form }}
+        <button class="btn btn-primary" id=button-id>提交</button>
+    </form>
 {% endblock %}

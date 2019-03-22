@@ -9,8 +9,9 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 import os
 
-from .models import Article, Comment, ImageAlbum
-from .forms import CommentModelForm, ArticleModelForm, ArticleContextModelForm
+from .models import Article, Comment
+from .forms import ArticleModelForm, CommentModelForm
+import pytz
 # Create your views here.
 
 
@@ -19,172 +20,128 @@ def index(request):
     message = {}
     latest_article_list = None
 
-    try:
-        latest_article_list = Article.objects.order_by('-article_created_time')
-    except Article.DoesNotExist:
+    latest_article_list = Article.objects.order_by("-created_time")[:30]
+    if latest_article_list.count() == 0:
         message["article_not_exist"] = "文章不存在!"
 
-    for article in latest_article_list:
-        try:
-            album = ImageAlbum()
-            album = ImageAlbum.objects.get(album_article=article)
-        except ImageAlbum.DoesNotExist:
-            error_message = "image for " + str(article.article_title) + " does not exist"
-            message["error_message"] = error_message
-            print(error_message)
-        list.append((article, album))
+    message["article_list"] = latest_article_list
+    return render(request, "jianshu/index.html", message)
 
-    message['list'] = list
-    return render(request, 'jianshu/index.html', message)
-
-@csrf_exempt
-@login_required(login_url='login')
+@login_required(login_url="login")
 def write_article(request):
     message = {}
+    article_form = ArticleModelForm()
 
     if request.method == "POST":
-        article_form = ArticleModelForm(request.POST)
-        img = request.FILES.get('img')
-        if img is None:
-            return HttpResponse("图片加载失败")
-        elif article_form.is_valid():
-            article_form.save()
-            # ImageAlbumModelForm不知道如何用
-            article = Article.objects.get(article_title=request.POST.get('article_title'))
-            try:
-                img = ImageAlbum(album_user=request.user,
-                                 album_article=article,
-                                 album_img=img)
-                img.save()
-            except:
-                message["img_error"] = "图片保存失败"
+        article_form = ArticleModelForm(request.POST, request.FILES)
+        if article_form.is_valid():
+            article_form_instance = article_form.save(commit=False)
+            article_form_instance.author = request.user
+            article_form_instance.save()
+            return redirect("index")
         else:
-            return HttpResponse("文章缺少标题或内容")
-        return redirect('index')
-
+            message["error_message"] = "article form error"
+    
+    message["form"] = article_form
+    message["author"] = request.user    
     message["created_time"] = timezone.now()
-    return render(request, 'jianshu/write.html', message)
+    return render(request, "jianshu/write.html", message)
 
-
-def article_content(request, article_id):
-    message = {}
-    album = ImageAlbum()
-    article = Article()
-    try:
-        article = Article.objects.get(article_id=article_id)
-    except Article.DoesNotExist:
-        message["article_not_exist"] = "当前文章不存在"
-    comments = Comment.objects.filter(article=article).order_by('-comment_create_time')[:5]
-    if article:
-        try:
-            album = ImageAlbum.objects.get(album_article=article)
-            if album.album_user.username == request.user.username:
-                message['edit_and_delete'] = True
-        except ImageAlbum.DoesNotExist:
-            message["img_error"] = "图片不存在"
-
-    message['article'] = article
-    message['comments'] = comments
-    message['album'] = album
-
-    return render(request, 'jianshu/article_content.html', message)
-
-@csrf_exempt
-@login_required(login_url='login')
-def edit_article(request, article_id):
+def article_content(request, id):
     message = {}
     article = Article()
+    comment_form = CommentModelForm()
+ 
     try:
-        article = Article.objects.get(article_id=article_id)
+        article = Article.objects.get(id=id)
+        if article.author == request.user:
+            message["edit_and_delete"] = True
     except Article.DoesNotExist:
         message["article_not_exist"] = "当前文章不存在"
-    if article:
-        try:
-            album = ImageAlbum.objects.get(album_article=article)
-            if request.user != album.album_user:
-                message["user_error"] = "当前用户无编辑该文章权限"
-                print(message["user_error"])
-                return HttpResponse(message["user_error"])
-        except ImageAlbum.DoesNotExist:
-            message["img_error"] = "图片不存在"
+    
+    if request.method == "POST":
+        message = {"status": "failed", "message": "comment failed"}
+        comment_form = CommentModelForm(request.POST)
+        if comment_form.is_valid():
+            comment_form_instance = comment_form.save(commit=False)
+            comment_form_instance.article = article
+            comment_form_instance.save()
+            message["status"] = "success"
+            message["message"] = "comment success"
+            message["time"] = timezone.now()
+        return JsonResponse(message)
+
+    comments = Comment.objects.filter(article=article).order_by("-created_time")[:5]
+    message["article"] = article
+    message["comments"] = comments
+    message["comment_form"] = comment_form
+    return render(request, "jianshu/article_content.html", message)
+
+
+@login_required(login_url="login")
+def edit_article(request, id):
+    message = {}
+    article = Article()
+
+    try:
+        article = Article.objects.get(id=id)
+    except Article.DoesNotExist:
+        message["article_not_exist"] = "当前文章不存在"
+
+    if article.author != request.user:
+        message["permission_error"] = "PermissionError"
+        return redirect("article_content")
 
     if request.method == "POST":
-        if request.POST['article_context']:
-            Article.objects.filter(article_id=article_id).update(article_context=request.POST['article_context'])
-            return redirect('article_content', article_id=article_id)
+        if request.POST["article_context"]:
+            Article.objects.filter(id=id).update(context=request.POST["article_context"])
+            return redirect("article_content", id=id)
         else:
             return HttpResponse("文章修改失败")
 
     message["article"] = article
-    return render(request, 'jianshu/edit.html', message)
+    return render(request, "jianshu/edit.html", message)
 
-@csrf_exempt
-@login_required(login_url='login')
-def del_article(request, article_id):
+@login_required(login_url="login")
+def del_article(request, id):
     message = {}
     article = Article()
+    
     try:
-        article = Article.objects.get(article_id=article_id)
+        article = Article.objects.get(id=id)
     except Article.DoesNotExist:
         message["article_not_exist"] = "当前文章不存在"
-    if article:
-        try:
-            album = ImageAlbum.objects.get(album_article=article)
-            if request.user != album.album_user:
-                message["user_error"]  = "当前用户没有权限删除该文章"
-                print(message["user_error"])
-                return HttpResponse(message["user_error"])
-        except ImageAlbum.DoesNotExist:
-            message["img_error"] = "图片不存在"
 
+    if article.author != request.user:    
+        message["permission_error"] = "PermissionError"
+        return redirect("article_content", id=id)
+      
     if request.method == "POST":
-        confirm_info = request.POST['confirm']
-        if confirm_info == 'y':
-            img_path = str(os.getcwd() + '/jianshu/static/media/' + str(album.album_img))
+        confirm_info = request.POST["confirm"]
+        if confirm_info == "y":
+            img_path = str(os.getcwd() + "/jianshu/static/media/" + str(article.image))
             os.remove(img_path)
-            album.delete()
             article.delete()
-            return redirect('index')
+            return redirect("index")
         else:
-            return redirect('article_content', article_id=article_id)
+            return redirect("article_content", id=id)
 
-    return render(request, 'jianshu/delete_article.html')
+    return render(request, "jianshu/delete_article.html")
 
-@csrf_exempt
-@login_required(login_url='login')
-def write_comment(request, article_id):
-    message = {}
-    article = Article()
-    try:
-        article = Article.objects.get(article_id=article_id)
-    except Article.DoesNotExist:
-        error_message = "Article id " + str(article_id) + "does not exist !"
-        message["error_message"] = error_message
-        print(error_message)
+"""
+    jsonResponse
+    1.dict => json seclier =>string
+    2.HttpResponse(string, mimeType="json/application")
+"""
 
-    if request.method == "POST":
-        message = {"status": "failed", "message": "添加失败"}
-        comment_form = CommentModelForm(request.POST)
-        if comment_form.is_valid():
-            comment_form.save()
-            message["status"] = "success"
-            message["message"] = "添加成功"
-        return JsonResponse(message)
-
-    comments = Comment.objects.filter(article=article).order_by("-comment_create_time")
-    message["article"] = article
-    message["comments"] = comments
-    return render(request, "jianshu/write_comment.html", message)
-
-@csrf_exempt
 def register(request):
     message = {}
 
     if request.method == "POST":
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password1 = request.POST.get('password1')
-        password2 = request.POST.get('password2')
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        password1 = request.POST.get("password1")
+        password2 = request.POST.get("password2")
 
         if not username or not email or not password1 or not password2:
             message["error_info"] = "请输入完整的注册信息"
@@ -200,32 +157,30 @@ def register(request):
                 user.save()
                 user_login = authenticate(request, username=username, email=email, password=password1)
                 login(request, user_login)
-                return redirect('index')
+                return redirect("index")
 
-    return render(request, 'jianshu/register.html', message)
+    return render(request, "jianshu/register.html", message)
 
-@csrf_exempt
 def user_login(request):
     message = {}
 
     if request.method == "POST":
-        if not request.POST.get('username'):
+        if not request.POST.get("username"):
             message["no_username"] = "用户名为空"
-        elif not request.POST.get('password'):
+        elif not request.POST.get("password"):
             message["no_password"] = "密码为空"
         else:
-            username = request.POST.get('username')
-            password = request.POST.get('password')
+            username = request.POST.get("username")
+            password = request.POST.get("password")
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('index')
+                return redirect("index")
             else:
                 message["error"] = "用户名或密码错误"
 
-    return render(request, 'jianshu/login.html', message)
+    return render(request, "jianshu/login.html", message)
 
 def user_logout(request):
     logout(request)
-    return redirect('index')
-
+    return redirect("index")
