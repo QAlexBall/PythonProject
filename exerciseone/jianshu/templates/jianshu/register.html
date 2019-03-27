@@ -15,7 +15,8 @@
     <p>{{ password_not_same }}</p>
     <h3 class="page-title">注册</h3>
     <form action="", method="POST">
-        <div class="form-container">
+      {% csrf_token %}
+      <div class="form-container">
             <div class="form-group">
                 <input type="text" class="form-control" placeholder="username" name="username">
             </div>

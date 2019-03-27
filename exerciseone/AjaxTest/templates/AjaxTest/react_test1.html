@@ -1,0 +1,38 @@
+<html>
+  <head>
+  </head>
+  
+  <body>
+    
+    <div class='wrapper'>
+    </div>
+    <script src="/static/js/example.js"> </script>
+    
+
+
+
+
+    <div>
+      <button class='like-btn1'>
+        <span class='like-text1'> 点赞 </span>
+        <span> 👍 </span>
+      </button>
+    </div>
+
+    <script type="text/javascript">
+      const button = document.querySelector('.like-btn1')
+      const buttonText = button.querySelector('.like-text1')
+      let isLiked = false
+      button.addEventListener('click', () => {
+        isLiked = !isLiked
+        if (isLiked) {
+          buttonText.innerHTML = '取消'
+        } else {
+          buttonText.innerHTML = '点赞'
+        }
+      }, false)
+    </script>
+
+  </body>
+
+</html>
