@@ -41,7 +41,7 @@ class LikeButton extends Component {
 
   onClick () {
     this.setState({
-    isLiked: !this.state.isLiked
+      isLiked: !this.state.isLiked
     })
   }
 
