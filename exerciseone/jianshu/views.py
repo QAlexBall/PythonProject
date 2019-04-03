@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from django.core import serializers
 import os
 
 from .models import Article, Comment
@@ -14,9 +15,20 @@ from .forms import ArticleModelForm, CommentModelForm
 import pytz
 # Create your views here.
 
+@csrf_exempt
+def test(request):
+    message = {}
+    latest_article_list = None
+
+    latest_article_list = Article.objects.order_by("-created_time")[:30]
+    if latest_article_list.count() == 0:
+        message["article_not_exist"] = "article not exsit"
+
+    message["article_list"] = latest_article_list
+    article_list = serializers.serialize("json", latest_article_list)
+    return JsonResponse(article_list, safe=False)
 
 def index(request):
-    list = []
     message = {}
     latest_article_list = None
 
