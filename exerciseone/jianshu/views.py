@@ -17,15 +17,17 @@ import pytz
 
 @csrf_exempt
 def test(request):
-    message = {}
-    latest_article_list = None
+    article_list = []
 
     latest_article_list = Article.objects.order_by("-created_time")[:30]
-    if latest_article_list.count() == 0:
-        message["article_not_exist"] = "article not exsit"
 
-    message["article_list"] = latest_article_list
-    article_list = serializers.serialize("json", latest_article_list)
+    fields = ['pk', 'title', 'context']
+    for article in latest_article_list:
+        article_dict = {}
+        for field in fields:
+            article_dict[field] = getattr(article, field)
+        article_list.append(article_dict)
+
     return JsonResponse(article_list, safe=False)
 
 def index(request):
