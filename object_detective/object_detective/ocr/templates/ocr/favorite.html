@@ -4,22 +4,25 @@
 {% block head %}{% endblock %}
 
 {% block main %}
+<div class="page-title">
 {% load static %}
 
-<h3> 我的喜欢❤️ </h3>
+<h3 class="page-title"> 我的喜欢❤️ </h3>
 {% if favorites %}
     <ul>
     {% for favorite in favorites %}
             <a href="/ocr/image/{{ favorite.image.id }}/">
             <p> 查看原图-----图片ID：{{favorite.image.id }} </p>
         </a>
-            <h3>
-                <img src="/static/media/{{ favorite.image.img_path }}" width="150" />
+                <img src="/static/media/{{ favorite.image.img_path }}" width="120" />
+            <h5>
                 图片信息：{{ favorite.image.tag }} 
-            </h3>
+            </h5>
 
             <h5> 上传时间：{{ favorite.add_date }} </h5>
-            <a href="{% url 'image' %}"><button>文本识别</button></a>
+            <a href="{% url 'image' id=favorite.image.id %}">
+                <button class="btn btn-primary">文本识别</button>
+            </a>
         </a>
         </li>
     {% endfor %}
@@ -27,4 +30,5 @@
 {% else %}
     <p> No result are available. </p>
 {% endif %}
+</div>
 {% endblock %}

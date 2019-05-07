@@ -44,13 +44,15 @@
                 <li><a href="{% url 'upload' %}">上传图片⏫</a></li>
                 <li><a href="{% url 'history' %}">识别历史</a></li>
                 <li><a href="{% url 'favorite' %}">我的喜欢❤️</a></li>
+                <li><a href="">图像增强</a></li>
             </ul>
-
-            <form class="navbar-form navbar-left">
+            
+            <form class='navbar-form navbar-left' action="{% url 'search' %}", method="POST" enctype="multipart/form-data">
+              {% csrf_token %}
               <div class="form-group">
-                  <input type="text" class="form-control" placeholder="">
+                  <input type="text" class="form-control" placeholder="keyword" name="keyword">
               </div>
-            <button type="submit" class="btn btn-default">搜索</button>
+              <button type="submit" class="btn btn-default">搜索</button>
             </form>
             <ul class="nav navbar-nav navbar-right">
                 {% if user.is_authenticated %}
