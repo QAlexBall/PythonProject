@@ -15,6 +15,22 @@ from .forms import ArticleModelForm, CommentModelForm
 import pytz
 # Create your views here.
 
+import markdown
+
+def markdown_test(request, id):
+    article = Article.objects.get(id=id)
+    article.context = markdown.markdown(article.context, 
+                                     extensions=[
+                                     'markdown.extensions.extra',
+                                     'markdown.extensions.codehilite',
+                                     ])
+    message = { 'article': article }
+    if article.author == request.user:
+            message["edit_and_delete"] = True
+    return render(request, 'jianshu/markdown_test.html', message)
+
+ 
+
 @csrf_exempt
 def test(request):
     article_list = []

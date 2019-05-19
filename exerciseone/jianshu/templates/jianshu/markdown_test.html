@@ -1,3 +1,4 @@
+
 {% extends 'jianshu/base.html' %}
 {% block title %}
 Index
@@ -48,11 +49,10 @@ Index
         <h5 class="page-title">作者: {{ article.author }} </h5>
         <h5 class="page-title">创建时间: {{ article.created_time }}</h5>
         <img src="/static/media/{{ article.image }}" alt="" height="100" width="100">
-        <p>{{ article.context }} </p>
+        <p>{{ article.context|safe }} </p>
         {% if edit_and_delete == True %}
             <p>
                 <a href="/jianshu/{{ article.id }}/edit/"><button class="btn">edit</button></a>
-                <a href="/jianshu/markdown_test/{{ article.id }}"><button class="btn">markdown_test</button></a>
                 <a href="/jianshu/{{ article.id }}/delete/"><button class="btn">delete</button></a>
             </p>
         {% endif %}
